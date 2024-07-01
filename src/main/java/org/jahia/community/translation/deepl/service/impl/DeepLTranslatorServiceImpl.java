@@ -184,7 +184,13 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
     }
 
     private DeepLTranslationResponse translateAndSave(TranslationData data, String srcLanguage, String targetLanguage, Locale responseLocale) {
-        final Map<String, String> translations = generateTranslations(data, srcLanguage, targetLanguage);
+        final Map<String, String> translations;
+        try {
+            translations = generateTranslations(data, srcLanguage, targetLanguage);
+        } catch (IllegalStateException e) {
+            logger.error(e.getMessage());
+            return new DeepLTranslationResponseImpl(false, getText("translatorNotInitialized", responseLocale));
+        }
         final String targetLangLabel = new Locale(targetLanguage).getDisplayLanguage(responseLocale);
 
         if (MapUtils.isEmpty(translations)) {
@@ -206,7 +212,7 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
 
     private Map<String, String> generateTranslations(TranslationData data, String srcLanguage, String destLanguage) {
         if (translator == null) {
-            return null;
+            throw new IllegalStateException("The translator is not initialized");
         }
         if (!data.hasTextToTranslate()) {
             return null;
