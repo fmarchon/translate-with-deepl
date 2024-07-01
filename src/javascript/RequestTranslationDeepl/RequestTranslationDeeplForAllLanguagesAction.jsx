@@ -4,7 +4,7 @@ import {useSelector} from 'react-redux';
 import {useNodeInfo} from '@jahia/data-helper';
 
 export const RequestTranslationDeeplActionForAllLanguagesAction = ({path, render: Render, subTree, allLanguages, ...otherProps}) => {
-    const {t} = useTranslation('translation-deepl');
+    const {t} = useTranslation('translate-with-deepl');
     const {language} = useSelector(state => ({language: state.language, site: state.site, uilang: state.uilang}));
     const {node, nodeLoading: nodeLoading} = useNodeInfo({path: path, language: language}, {getDisplayName: true});
 

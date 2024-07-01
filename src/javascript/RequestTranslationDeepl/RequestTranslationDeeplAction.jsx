@@ -5,7 +5,7 @@ import {useSelector} from 'react-redux';
 import {toIconComponentFunction} from '@jahia/moonstone';
 
 export const RequestTranslationDeeplAction = ({path, render: Render, ...otherProps}) => {
-    const {t} = useTranslation('translation-deepl');
+    const {t} = useTranslation('translate-with-deepl');
     const {language, site} = useSelector(state => ({language: state.language, site: state.site}));
     const {siteInfo, loading} = useSiteInfo({siteKey: site, displayLanguage: language});
     const {node, nodeLoading: nodeLoading} = useNodeInfo({path: path, language: language}, {getDisplayName: true});
