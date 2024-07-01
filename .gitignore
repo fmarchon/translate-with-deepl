@@ -17,7 +17,3 @@ repository.xml.generated
 node
 node_modules
 src/main/resources/javascript/apps
-pom.xml.next
-pom.xml.releaseBackup
-pom.xml.tag
-release.properties

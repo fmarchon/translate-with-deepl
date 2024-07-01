@@ -7,16 +7,16 @@
         <version>8.1.2.3</version>
     </parent>
 
-    <groupId>org.jahia.community</groupId>
-    <artifactId>translation-deepl</artifactId>
-    <name>Translation - DeepL</name>
-    <version>1.0.5-SNAPSHOT</version>
+    <groupId>org.jahia.community.modules</groupId>
+    <artifactId>translate-with-deepl</artifactId>
+    <name>Translate with DeepL</name>
+    <version>1.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <description>Module to allow you asking translation to DeepL from jContent.</description>
+    <description>UI to get the content translated by DeepL</description>
     <scm>
-        <connection>scm:git:git@github.com:Jahia/translation-deepl.git</connection>
-        <developerConnection>scm:git:git@github.com:Jahia/translation-deepl.git</developerConnection>
-        <url>https://github.com/Jahia/translation-deepl</url>
+        <connection>scm:git:git@github.com:Jahia/translate-with-deepl.git</connection>
+        <developerConnection>scm:git:git@github.com:Jahia/translate-with-deepl.git</developerConnection>
+        <url>https://github.com/Jahia/translate-with-deepl</url>
         <tag>HEAD</tag>
     </scm>
 

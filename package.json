@@ -1,5 +1,5 @@
 {
-    "name": "@jahia/transation-deepl",
+    "name": "@jahia/translate-with-deepl",
     "version": "1.0.0",
     "scripts": {
         "build": "yarn webpack",
@@ -19,10 +19,9 @@
         "lint": "yarn lint:scss && yarn lint:js",
         "lint:fix": "yarn lint:js:fix && yarn lint:scss:fix"
     },
-    "description": "translation-deepl for Jahia",
+    "description": "translate-with-deepl for Jahia",
     "main": "index.js",
-    "repository": "git@github.com:Jahia/translation-deepl.git",
-    "author": "Jahia Customer Support Team <support@jahia.com>",
+    "repository": "git@github.com:Jahia/translate-with-deepl.git",
     "license": "MIT",
     "jahia": {
         "remotes": {

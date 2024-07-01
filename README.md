@@ -1,12 +1,12 @@
 
-# Translation - DeepL
+# Translate with DeepL
 
 The purpose of this module is to allow you requesting Translations from DeepL with a simple click from jContent.
 
 ## Installation
 
 - In Jahia, go to "Administration --> Server settings --> System components --> Modules"
-- Upload the JAR **translation-deepl-X.X.X.jar**
+- Upload the JAR **translate-with-deepl-X.X.X.jar**
 - Check that the module is started
 - Activate it on the websites where you want to use it
 
