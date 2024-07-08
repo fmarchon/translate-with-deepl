@@ -24,6 +24,7 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.PropertyIterator;
 import javax.jcr.PropertyType;
@@ -112,6 +113,9 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
     @Override
     public DeepLTranslationResponse translate(JCRNodeWrapper pNode, boolean translateSubtree, String sourceLanguage, String targetLanguage, boolean allLanguages, Locale responseLocale) throws RepositoryException {
         final JCRSessionWrapper pNodeSession = pNode.getSession();
+        if (!StringUtils.equals(pNodeSession.getWorkspace().getName(), Constants.EDIT_WORKSPACE)) {
+            throw new IllegalArgumentException("The translation source must be in the " + Constants.EDIT_WORKSPACE + " workspace");
+        }
         final Locale pNodeSrcLocale = pNodeSession.getLocale();
         final String pNodeSrcLanguage = LanguageCodeConverters.localeToLanguageTag(pNodeSrcLocale);
         final Set<String> siteLanguages = pNode.getResolveSite().getLanguages();
@@ -162,6 +166,7 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
 
     private void analyzeNode(JCRNodeWrapper node, TranslationData data) {
         if (!isTranslatableNode(node)) return;
+        if (!hasPendingModifications(node)) return;
 
         final PropertyIterator properties;
         try {
@@ -276,6 +281,19 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
             logger.error("", e);
         }
         return false;
+    }
+
+    private boolean hasPendingModifications(JCRNodeWrapper node) {
+        try {
+            if (!node.hasI18N(node.getSession().getLocale())) return false;
+            final Node translationNode = node.getI18N(node.getSession().getLocale());
+            if (!translationNode.hasProperty(Constants.JCR_LASTMODIFIED)) return true;
+            if (!translationNode.hasProperty(Constants.LASTPUBLISHED)) return true;
+            return translationNode.getProperty(Constants.JCR_LASTMODIFIED).getDate().after(translationNode.getProperty(Constants.LASTPUBLISHED).getDate());
+        } catch (RepositoryException e) {
+            logger.error("", e);
+            return false;
+        }
     }
 
     private boolean isTranslatableProperty(Property property) {
