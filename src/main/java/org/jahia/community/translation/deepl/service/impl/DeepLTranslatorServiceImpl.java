@@ -15,6 +15,7 @@ import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.JCRSessionWrapper;
 import org.jahia.services.content.nodetypes.ExtendedPropertyDefinition;
+import org.jahia.services.content.nodetypes.SelectorType;
 import org.jahia.utils.LanguageCodeConverters;
 import org.jahia.utils.i18n.Messages;
 import org.osgi.framework.FrameworkUtil;
@@ -289,6 +290,9 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
         return definition.isInternationalized()
                 && !definition.isMultiple()
                 && definition.getRequiredType() == PropertyType.STRING
+                && !(definition.getSelector() == SelectorType.CHOICELIST)
+                && !(definition.getSelector() == SelectorType.CRON)
+                && !(definition.getSelector() == SelectorType.TAG)
                 && !definition.isHidden()
                 && !definition.isProtected();
     }
