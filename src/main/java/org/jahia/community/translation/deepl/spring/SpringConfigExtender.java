@@ -36,9 +36,8 @@ public class SpringConfigExtender implements JahiaAfterInitializationService, Di
 
     private static final Logger logger = LoggerFactory.getLogger(SpringConfigExtender.class);
 
-    Toolbar contextMenu;
-    Menu deepLMenu;
-    Set<String> itemKeys = new HashSet<>();
+    final Map<Menu, Set<String>> buttonReferences = new HashMap<>();
+    final Map<Toolbar, Set<String>> menuReferences = new HashMap<>();
 
     @Override
     public void initAfterAllServicesAreStarted() throws JahiaInitializationException {
@@ -49,51 +48,27 @@ public class SpringConfigExtender implements JahiaAfterInitializationService, Di
             return;
         }
 
+        boolean pagesTabFound = false;
         for (SidePanelTab tab : editmode.getTabs()) {
             if ("pages".equals(tab.getKey())) {
-                contextMenu = tab.getTreeContextMenu();
-                int targetIdx = 0;
-                for (Item item : contextMenu.getItems()) {
-                    targetIdx++;
-                    if (item.getActionItem() instanceof TranslateMenuActionItem) break;
-                }
-
-                deepLMenu = getBean("Toolbar.Item.PagesTab.DeepLMenu", Menu.class);
-                deepLMenu.setVisibility(new DeepLVisibility());
-                contextMenu.addItem(targetIdx, deepLMenu);
-
-                getServerLanguages().stream()
-                        .flatMap(srcLang ->
-                                getServerLanguages().stream()
-                                        .filter(l2 -> !StringUtils.equals(srcLang, l2))
-                                        .map(targetLang -> {
-                                            final Item item = getBean("contextMenu.deeplTranslateItem", Item.class);
-                                            item.setId("deeplButton-" + srcLang + "-" + targetLang);
-                                            item.setTitle(getLanguageLabel(srcLang) + " -> " + getLanguageLabel(targetLang));
-                                            item.setVisibility(new DeepLVisibility(srcLang, targetLang));
-                                            final ExecuteActionItem actionItem = (ExecuteActionItem) item.getActionItem();
-                                            final Map<String, String> parameters = new HashMap<>();
-                                            parameters.put(DeeplConstants.PROP_SUB_TREE, "true");
-                                            parameters.put(DeeplConstants.PROP_SRC_LANGUAGE, srcLang);
-                                            parameters.put(DeeplConstants.PROP_DEST_LANGUAGE, targetLang);
-                                            actionItem.setParameters(parameters);
-
-                                            itemKeys.add(item.getId());
-                                            return item;
-                                        }))
-                        .forEach(deepLMenu::addItem);
-                return;
+                pagesTabFound = true;
+                addDeepLMenu(tab.getTreeContextMenu(), "pagesTab");
+                break;
             }
         }
-        logger.error("Impossible to identify the \"pages\" tab");
+        if (!pagesTabFound) logger.error("Impossible to identify the \"pages\" tab");
+
+        addDeepLMenu(editmode.getContextMenu(), "mainContextMenu");
     }
 
     @Override
     public void destroy() throws Exception {
-        if (deepLMenu != null) {
-            itemKeys.forEach(deepLMenu::removeItem);
-            if (contextMenu != null) contextMenu.removeItem("deepl-menu");
-        }
+        buttonReferences.entrySet()
+                .forEach(e -> e.getValue().forEach(e.getKey()::removeItem));
+        buttonReferences.clear();
+        menuReferences.entrySet()
+                .forEach(e -> e.getValue().forEach(e.getKey()::removeItem));
+        menuReferences.clear();
     }
 
     private List<String> getServerLanguages() {
@@ -110,6 +85,43 @@ public class SpringConfigExtender implements JahiaAfterInitializationService, Di
     private String getLanguageLabel(String lang) {
         final Locale locale = new Locale(lang);
         return locale.getDisplayLanguage(locale);
+    }
+
+    private void addDeepLMenu(Toolbar contextMenu, String id) {
+        int targetIdx = 0;
+        for (Item item : contextMenu.getItems()) {
+            targetIdx++;
+            if (item.getActionItem() instanceof TranslateMenuActionItem) break;
+        }
+
+        final Menu deepLMenu = getBean("Toolbar.Item.PagesTab.DeepLMenu", Menu.class);
+        deepLMenu.setId("deepl-menu-" + id);
+        deepLMenu.setVisibility(new DeepLVisibility());
+        contextMenu.addItem(targetIdx, deepLMenu);
+        menuReferences.put(contextMenu, Collections.singleton(deepLMenu.getId()));
+        final Set<String> buttonKeys = new HashSet<>();
+        buttonReferences.put(deepLMenu, buttonKeys);
+
+        getServerLanguages().stream()
+                .flatMap(srcLang ->
+                        getServerLanguages().stream()
+                                .filter(l2 -> !StringUtils.equals(srcLang, l2))
+                                .map(targetLang -> {
+                                    final Item item = getBean("contextMenu.deeplTranslateItem", Item.class);
+                                    item.setId("deeplButton-" + srcLang + "-" + targetLang);
+                                    item.setTitle(getLanguageLabel(srcLang) + " -> " + getLanguageLabel(targetLang));
+                                    item.setVisibility(new DeepLVisibility(srcLang, targetLang));
+                                    final ExecuteActionItem actionItem = (ExecuteActionItem) item.getActionItem();
+                                    final Map<String, String> parameters = new HashMap<>();
+                                    parameters.put(DeeplConstants.PROP_SUB_TREE, "true");
+                                    parameters.put(DeeplConstants.PROP_SRC_LANGUAGE, srcLang);
+                                    parameters.put(DeeplConstants.PROP_DEST_LANGUAGE, targetLang);
+                                    actionItem.setParameters(parameters);
+
+                                    buttonKeys.add(item.getId());
+                                    return item;
+                                }))
+                .forEach(deepLMenu::addItem);
     }
 
     private <C> C getBean(String beanID, Class C) {
