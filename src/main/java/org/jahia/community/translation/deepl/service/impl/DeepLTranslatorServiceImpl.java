@@ -166,7 +166,8 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
 
     private void analyzeNode(JCRNodeWrapper node, TranslationData data) {
         if (!isTranslatableNode(node)) return;
-        if (!hasPendingModifications(node)) return;
+        /* UNIL FM, 28-Aug-24 HACK: do not test for pending modification */
+        /*if (!hasPendingModifications(node)) return;*/
 
         final PropertyIterator properties;
         try {
